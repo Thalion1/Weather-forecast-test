@@ -1,3 +1,46 @@
+class hourlyStep {
+    constructor(time, temperature, weather_code, precipitation, wind_speed, wind_direction, day) {
+        this.time = time,
+        this.temperature = temperature,
+        this.weather_code = weather_code,
+        this.precipitation = precipitation,
+        this.wind_speed = wind_speed,
+        this.wind_direction = wind_direction
+        if (day === 1) {
+            this.day = '_day'
+        } else if (day === 0) {
+            this.day = '_night'
+        } else {
+            this.day = ''
+        }
+    }
+}
+
+class symbolAdder {
+    constructor(y, wind_direction, iconURL, day, description) {
+        this.y = y
+        if (wind_direction === "") {
+            this.marker = {
+                symbol: `url(https://raw.githubusercontent.com/metno/weathericons/refs/heads/main/weather/svg/${iconURL + day}.svg)`,
+                width: 30,
+                height: 30
+            }
+        } else {
+            this.label = '↓',
+            this.marker = {
+                width: 40,
+                height: 40,
+                rotation: wind_direction
+            }
+        }
+        if (description) {
+            this.accessibility = {
+                description: description
+            }
+        }
+    }
+}
+
 export async function getWhere(props) {
     const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${props.input}&format=jsonv2`);
     const data = await response.json();
@@ -16,5 +59,37 @@ export async function getWeather({lat, lon}) {
     console.log(weatherCodeInfoData);
     console.log(openMeteoData);
     console.log(pentData);
+
+    dataCleanup(openMeteoData, pentData)
+}
+
+function dataCleanup(openMeteo, pentData) {
+    const data = openMeteo.hourly;
+    let result = [];
+    
+    for (const day of pentData.yr) {
+        const dayStart = new Date(day.steps[0].startDate).toISOString().substr(0, 16);
+        const dayEnd = new Date(day.steps[day.steps.length - 1].startDate).toISOString().substr(0, 16);
+        let days = []
+        let temp = 0;
+        for (let i = data.time.indexOf(dayStart); i < data.time.indexOf(dayEnd)+1; i++) {
+            days.push(new hourlyStep(
+                data.time[i],
+                data.apparent_temperature[i],
+                data.weather_code[i],
+                data.precipitation[i],
+                data.wind_speed_10m[i],
+                data.wind_direction_10m[i],
+                data.is_day[i]
+            ));
+        }
+        result.push(days);
+        temp++
+    }
+    
+    return result;
+}
+
+function marge(openMeteo, pent) {
     
 }
