@@ -56,11 +56,7 @@ export async function getWeather({lat, lon}) {
     const openMeteoData = await openMeteoResponse.json();
     const pentData = await pentResponse.json();
     
-    console.log(weatherCodeInfoData);
-    console.log(openMeteoData);
-    console.log(pentData);
-
-    dataCleanup(openMeteoData, pentData)
+    return marge(dataCleanup(openMeteoData, pentData), pentData, weatherCodeInfoData);
 }
 
 function dataCleanup(openMeteo, pentData) {
@@ -90,6 +86,34 @@ function dataCleanup(openMeteo, pentData) {
     return result;
 }
 
-function marge(openMeteo, pent) {
-    
+function marge(openMeteo, pent, weatherCode) {
+    const key = Object.keys(pent);
+    let result = [];
+    for (const items of key) {
+        let tempArray = [];
+        for (const item of pent[items][0].steps) {
+            tempArray.push(new symbolAdder(
+                item.temperature,
+                "",
+                weatherCode[parseInt(item.symbol.substr(0, 2)) - 1].code,
+                weatherCode[parseInt(item.symbol.substr(0, 2)) - 1].dayNight ? (item.symbol.length === 2 ? '_day' : '_night') : ''
+            ));
+        }
+        result.push({data: tempArray, name: items})
+    }
+    let temp = []
+    for (const item of openMeteo[0]) {
+        try {
+            temp.push(new symbolAdder(
+                item.temperature,
+                "",
+                weatherCode[item.weather_code].code,
+                weatherCode[item.weather_code].dayNight ? item.day : ''
+            ))
+        } catch (TypeError) {
+            temp.push(item.temperature)
+        }
+    }
+    result.push({data: temp, name: 'openMeteo'})
+    return result
 }
