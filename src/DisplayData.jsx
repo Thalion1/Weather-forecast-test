@@ -20,9 +20,10 @@ export function SplineChart(props) {
 export function ColumnChart(props) {
     return (
         <Chart backgroundColor={props.color.background}>
-          <Title>{`<span style="color:${props.color.text}">${props.title}</span>`}</Title>
-          {/* <Legend>{"{index}: {name}"}</Legend> */}
-          <ColumnSeries data={props.data} name={`<span style="color:${props.color.text}">column chart</span>`} color="red" />
+            <Title>{`<span style="color:${props.color.text}">${props.title}</span>`}</Title>
+            <XAxis labels={{ style: { color: props.color.text } }} title={{ style: { color: props.color.text } }}/>
+            <YAxis labels={{ style: { color: props.color.text } }} title={{ style: { color: props.color.text } }}/>
+            <ColumnSeries data={props.data} name={`<span style="color:${props.color.text}">column chart</span>`} color="red" />
         </Chart>
     );
 }
