@@ -1,29 +1,31 @@
-import React from "react";
+import { useRef } from "react";
 import { Chart, Title, Legend, XAxis, YAxis } from "@highcharts/react";
 import { SplineSeries } from "@highcharts/react/series/Spline";
 import { ColumnSeries } from "@highcharts/react/series/Column";
-export function SplineChart(props) {
-    const series = props.data || [];
+export function SplineChart({ title, data = [], color, chartRef }) {
+	const series = data || [];
 
-    return (
-        <Chart backgroundColor={props.color.background}>
-            <Title>{`<span style="color:${props.color.text}">${props.title}</span>`}</Title>
-            <XAxis labels={{ style: { color: props.color.text } }} title={{ style: { color: props.color.text } }}/>
-            <YAxis labels={{ style: { color: props.color.text } }} title={{ style: { color: props.color.text } }}/>
-            {series.map((s, i) => (
-                <SplineSeries key={s.name ?? i} data={s.data} name={`<span style="color:${s.color ?? props.color.text}">${s.name}</span>`} />
-            ))}
-        </Chart>
-    );
+	return (
+		<Chart ref={chartRef} backgroundColor={color.background}>
+			<Title>{`<span style="color:${color.text}">${title}</span>`}</Title>
+			<XAxis labels={{ style: { color: color.text } }} title={{ style: { color: color.text } }} />
+			<YAxis labels={{ style: { color: color.text } }} title={{ style: { color: color.text } }} />
+			{data.map((s, i) => (
+				<SplineSeries key={s.name ?? i} data={s.data} name={`<span style="color:${s.color ?? color.text}">${s.name}</span>`} />
+			))}
+		</Chart>
+	);
 }
 
-export function ColumnChart(props) {
-    return (
-        <Chart backgroundColor={props.color.background}>
-            <Title>{`<span style="color:${props.color.text}">${props.title}</span>`}</Title>
-            <XAxis labels={{ style: { color: props.color.text } }} title={{ style: { color: props.color.text } }}/>
-            <YAxis labels={{ style: { color: props.color.text } }} title={{ style: { color: props.color.text } }}/>
-            <ColumnSeries data={props.data} name={`<span style="color:${props.color.text}">column chart</span>`} color="red" />
-        </Chart>
-    );
+export function ColumnChart({ title, data = [], color, chartRef }) {
+	return (
+		<Chart backgroundColor={color.background}>
+			<Title>{`<span style="color:${color.text}">${title}</span>`}</Title>
+			<XAxis labels={{ style: { color: color.text } }} title={{ style: { color: color.text } }} />
+			<YAxis labels={{ style: { color: color.text } }} title={{ style: { color: color.text } }} />
+			{data.map((s, i) => (
+				<ColumnSeries key={s.name ?? i} data={s.data} name={`<span style="color:${s.color ?? color.text}">${s.name}</span>`} />
+			))}
+		</Chart>
+	);
 }
