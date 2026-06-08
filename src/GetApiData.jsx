@@ -51,7 +51,7 @@ export async function GetWeather({ lat, lon }) {
 	const openMeteoData = await openMeteoResponse.json();
 	const pentData = await pentResponse.json();
 
-	return marge(dataCleanup(openMeteoData, pentData), pentData, weatherCodeInfoData);
+	return {openMeteo: dataCleanup(openMeteoData, pentData), pent: pentData, code: weatherCodeInfoData};
 }
 
 function dataCleanup(openMeteo, pentData) {
@@ -81,7 +81,7 @@ function dataCleanup(openMeteo, pentData) {
 	return result;
 }
 
-function marge(openMeteo, pent, weatherCode) {
+export function marge({openMeteo, pent, code}, day) {
 	const key = Object.keys(pent);
 	let temps = [];
 	let rain = [];
@@ -93,12 +93,12 @@ function marge(openMeteo, pent, weatherCode) {
 			[],// rain
 			[] // wind
 		];
-		for (const item of pent[items][0].steps) {
+		for (const item of pent[items][day].steps) {
 			tempArray[0].push(new symbolAdder(
                 item.temperature,
                 "",
-                weatherCode[parseInt(item.symbol.substr(0, 2)) - 1].code,
-                weatherCode[parseInt(item.symbol.substr(0, 2)) - 1].dayNight ? (item.symbol.length === 2 ? "_day" : "_night") : ""
+                code[parseInt(item.symbol.substr(0, 2)) - 1].code,
+                code[parseInt(item.symbol.substr(0, 2)) - 1].dayNight ? (item.symbol.length === 2 ? "_day" : "_night") : ""
             ));
 			tempArray[1].push(item.precipitation);
 			tempArray[2].push(new symbolAdder(item.windSpeed, item.windDirection));
@@ -111,9 +111,9 @@ function marge(openMeteo, pent, weatherCode) {
 		[],// temp
 		[] // rain
 	];
-	for (const item of openMeteo[0]) {
+	for (const item of openMeteo[day]) {
 		try {
-			temp[0].push(new symbolAdder(item.temperature, "", weatherCode[item.weather_code].code, weatherCode[item.weather_code].dayNight ? item.day : ""));
+			temp[0].push(new symbolAdder(item.temperature, "", code[item.weather_code].code, code[item.weather_code].dayNight ? item.day : ""));
 		} catch (TypeError) {
 			temp[0].push(item.temperature);
 		}
@@ -122,7 +122,7 @@ function marge(openMeteo, pent, weatherCode) {
 	temps.push({ data: temp[0], name: "openMeteo" });
 	rain.push({ data: temp[1], name: "openMeteo" });
 
-	let result = { time: pent.yr[0].steps.map(obj => obj.startDate.substr(11,5)), temp: temps, rain: rain, wind: wind };
+	let result = { time: pent.yr[day].steps.map(obj => obj.startDate.substr(11,5)), temp: temps, rain: rain, wind: wind };
 	console.log(result, openMeteo, pent);
     
 	return result;

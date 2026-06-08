@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { SplineChart, ColumnChart } from "./DisplayData.jsx";
-import { GetWeather, GetWhere } from "./GetApiData.jsx";
+import { GetWeather, GetWhere, marge } from "./GetApiData.jsx";
 import "./App.css";
 
 export default function App() {
@@ -10,6 +10,8 @@ export default function App() {
 	const tempRef = useRef(null);
 	const rainRef = useRef(null);
 	const windRef = useRef(null);
+    let dataSet;
+    let day = 0;
 
 	useEffect(() => {
 		(async () => {
@@ -22,11 +24,26 @@ export default function App() {
 		const userInput = document.getElementById("user-input");
 		const userSubBtn = document.getElementById("user-submit");
 		const preveusbtn = document.getElementById("preveus");
-		console.log(preveusbtn);
+        const nextbtn = document.getElementById("next");
+		preveusbtn.disabled = true;
+
+        function onPrev() {
+            day--;
+            if (day <= 0) preveusbtn.disabled = true;
+            nextbtn.disabled = false;
+            onSubmit();
+        };
+        function onNext() {
+            day++;
+            if (day >= 2) nextbtn.disabled = true;
+            preveusbtn.disabled = false;
+            onSubmit();
+        };
 
 		const onSubmit = async () => {
 			const [lat, lon] = await GetWhere(userInput.value.replaceAll(" ", "+"));
-			const newData = await GetWeather({ lat, lon });
+            dataSet = await GetWeather({ lat, lon });
+			const newData = marge(dataSet, day);
 			setData(newData);
             
 			// Optional: in-place update via chart instance for better performance
@@ -49,9 +66,13 @@ export default function App() {
 
 		userInput.addEventListener("keydown", onKey);
 		userSubBtn.addEventListener("click", onSubmit);
+        preveusbtn.addEventListener('click', onPrev);
+        nextbtn.addEventListener('click', onNext);
 		return () => {
 			userInput.removeEventListener("keydown", onKey);
 			userSubBtn.removeEventListener("click", onSubmit);
+            preveusbtn.removeEventListener('click', onPrev);
+            nextbtn.removeEventListener('click', onNext);
 		};
 	}, []);
 
