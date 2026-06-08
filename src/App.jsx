@@ -31,18 +31,20 @@ export default function App() {
             day--;
             if (day <= 0) preveusbtn.disabled = true;
             nextbtn.disabled = false;
-            onSubmit();
+            onSubmit(true);
         };
         function onNext() {
             day++;
             if (day >= 2) nextbtn.disabled = true;
             preveusbtn.disabled = false;
-            onSubmit();
+            onSubmit(true);
         };
 
-		const onSubmit = async () => {
-			const [lat, lon] = await GetWhere(userInput.value.replaceAll(" ", "+"));
-            dataSet = await GetWeather({ lat, lon });
+		const onSubmit = async (dayChange) => {
+            if (!dayChange) {
+                const [lat, lon] = await GetWhere(userInput.value.replaceAll(" ", "+"));
+                dataSet = await GetWeather({ lat, lon });
+            }
 			const newData = marge(dataSet, day);
 			setData(newData);
             
@@ -61,16 +63,16 @@ export default function App() {
 		};
 
 		const onKey = async (e) => {
-			if (e.code === "Enter") await onSubmit();
+			if (e.code === "Enter") await onSubmit(false);
 		};
 
 		userInput.addEventListener("keydown", onKey);
-		userSubBtn.addEventListener("click", onSubmit);
+		userSubBtn.addEventListener("click", onSubmit(false));
         preveusbtn.addEventListener('click', onPrev);
         nextbtn.addEventListener('click', onNext);
 		return () => {
 			userInput.removeEventListener("keydown", onKey);
-			userSubBtn.removeEventListener("click", onSubmit);
+			userSubBtn.removeEventListener("click", onSubmit(false));
             preveusbtn.removeEventListener('click', onPrev);
             nextbtn.removeEventListener('click', onNext);
 		};
