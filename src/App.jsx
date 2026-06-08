@@ -15,8 +15,11 @@ export default function App() {
 
 	useEffect(() => {
 		(async () => {
-			const initial = await GetWeather({ lat: 62.19983, lon: 6.12904 });
-			setData(initial);
+			const [lat, lon] = await GetWhere("Oslo");
+			console.log(lat, lon);
+			
+			dataSet = await GetWeather({ lat, lon });
+			setData(marge(dataSet, day));
 		})();
 	}, []);
 

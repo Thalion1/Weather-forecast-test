@@ -1,6 +1,11 @@
 class hourlyStep {
 	constructor(time, temperature, weather_code, precipitation, wind_speed, wind_direction, day) {
-		((this.time = time), (this.temperature = temperature), (this.weather_code = weather_code), (this.precipitation = precipitation), (this.wind_speed = wind_speed), (this.wind_direction = wind_direction));
+		this.time = time,
+		this.temperature = temperature,
+		this.weather_code = weather_code,
+		this.precipitation = precipitation,
+		this.wind_speed = wind_speed,
+		this.wind_direction = wind_direction
 		if (day === 1) {
 			this.day = "_day";
 		} else if (day === 0) {
@@ -39,7 +44,8 @@ class symbolAdder {
 export async function GetWhere(props) {
 	const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${props}&format=jsonv2`);
 	const data = await response.json();
-
+	console.log(data);
+	
 	return [data[0].lat, data[0].lon];
 }
 
@@ -113,11 +119,17 @@ export function marge({openMeteo, pent, code}, day) {
 	];
 	for (const item of openMeteo[day]) {
 		try {
-			temp[0].push(new symbolAdder(item.temperature, "", code[item.weather_code].code, code[item.weather_code].dayNight ? item.day : ""));
+			temp[0].push(new symbolAdder(
+				item.temperature,
+				"",
+				codeForWmoWithIndex(code, item.weather_code).code,
+				code[codeForWmoWithIndex(code, item.weather_code).index].dayNight ? item.day : ""
+			));
 		} catch (TypeError) {
 			temp[0].push(item.temperature);
 		}
 		temp[1].push(item.precipitation);
+		console.log(codeForWmo(code, item.weather_code), codeForWmoWithIndex(code, item.weather_code));
 	}
 	temps.push({ data: temp[0], name: "openMeteo" });
 	rain.push({ data: temp[1], name: "openMeteo" });
@@ -126,4 +138,24 @@ export function marge({openMeteo, pent, code}, day) {
 	console.log(result, openMeteo, pent);
     
 	return result;
+}
+
+function codeForWmo(data, target) {
+  const entry = data.find(e => {
+    const w = e.wmo;
+    if (w === undefined) return false;
+    return Array.isArray(w) ? w.includes(target) : w === target;
+  });
+  return entry ? entry.code : undefined;
+}
+
+function codeForWmoWithIndex(data, target) {
+  for (let i = 0; i < data.length; i++) {
+    const w = data[i].wmo;
+    if (w === undefined) continue;
+    if (Array.isArray(w) ? w.includes(target) : w === target) {
+      return { index: i, code: data[i].code };
+    }
+  }
+  return null;
 }
