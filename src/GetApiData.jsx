@@ -122,7 +122,7 @@ function marge(openMeteo, pent, weatherCode) {
 	temps.push({ data: temp[0], name: "openMeteo" });
 	rain.push({ data: temp[1], name: "openMeteo" });
 
-	let result = { time: pent.yr[1].steps.map(obj => obj.startDate.substr(11,5)), temp: temps, rain: rain, wind: wind };
+	let result = { time: pent.yr[0].steps.map(obj => obj.startDate.substr(11,5)), temp: temps, rain: rain, wind: wind };
 	console.log(result, openMeteo, pent);
     
 	return result;
