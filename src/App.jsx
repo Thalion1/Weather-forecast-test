@@ -91,9 +91,9 @@ export default function App() {
 				<button id="next">→</button>
 			</nav>
 			<div id="container">
-				<SplineChart title="temp for the day" yaxis="Temprature" data={data.temp} time={data.time} color={{ background: backgroundColor, text: textColor }} chartRef={tempRef} />
-				<ColumnChart title="rain for the day" yaxis="Rain" data={data.rain} time={data.time} color={{ background: backgroundColor, text: textColor }} chartRef={rainRef} />
-				<SplineChart title="wind for the day" yaxis="Wind" data={data.wind} time={data.time} color={{ background: backgroundColor, text: textColor }} chartRef={windRef} />
+				<SplineChart title="temp for the day" yaxis="Temprature" tooltip="°C" data={data.temp} time={data.time} color={{ background: backgroundColor, text: textColor }} chartRef={tempRef} />
+				<ColumnChart title="rain for the day" yaxis="Rain" tooltip="mm" data={data.rain} time={data.time} color={{ background: backgroundColor, text: textColor }} chartRef={rainRef} />
+				<SplineChart title="wind for the day" yaxis="Wind" tooltip="m/s" data={data.wind} time={data.time} color={{ background: backgroundColor, text: textColor }} chartRef={windRef} />
 			</div>
 		</>
 	);
