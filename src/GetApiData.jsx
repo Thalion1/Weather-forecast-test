@@ -41,15 +41,14 @@ class symbolAdder {
 	}
 }
 
-export async function GetWhere(props) {
+export async function GetWhere(props) {// FUNCT: Get's lat and lon
 	const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${props}&format=jsonv2`);
 	const data = await response.json();
-	console.log(data);
 	
-	return [data[0].lat, data[0].lon];
+	return [data[0].lat, data[0].lon];// FIXME: it's spiting out errors on start
 }
 
-export async function GetWeather({ lat, lon }) {
+export async function GetWeather({ lat, lon }) {// FUNCT: Get's weather data
 	const weatherCodeInfo = await fetch(`https://thalion1.github.io/static-apis/weather-id-to-icon.JSON`);
 	const openMeteoResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,weather_code,apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,wind_direction_80m,wind_speed_80m,is_day&forecast_days=3&wind_speed_unit=ms`);
 	const pentResponse = await fetch(`https://pent.no/api/v2/long-term-forecast/${lat}/${lon}?days=3&resolution=1`);
@@ -60,7 +59,7 @@ export async function GetWeather({ lat, lon }) {
 	return {openMeteo: dataCleanup(openMeteoData, pentData), pent: pentData, code: weatherCodeInfoData};
 }
 
-function dataCleanup(openMeteo, pentData) {
+function dataCleanup(openMeteo, pentData) {// FUNCT: cleans up openMeteo data
 	const data = openMeteo.hourly;
 	let result = [];
 
@@ -87,7 +86,7 @@ function dataCleanup(openMeteo, pentData) {
 	return result;
 }
 
-export function marge({openMeteo, pent, code}, day) {
+export function marge({openMeteo, pent, code}, day) {// FUNCT: Combins data
 	const key = Object.keys(pent);
 	let temps = [];
 	let rain = [];
@@ -129,27 +128,16 @@ export function marge({openMeteo, pent, code}, day) {
 			temp[0].push(item.temperature);
 		}
 		temp[1].push(item.precipitation);
-		console.log(codeForWmo(code, item.weather_code), codeForWmoWithIndex(code, item.weather_code));
 	}
 	temps.push({ data: temp[0], name: "openMeteo" });
 	rain.push({ data: temp[1], name: "openMeteo" });
 
 	let result = { time: pent.yr[day].steps.map(obj => obj.startDate.substr(11,5)), temp: temps, rain: rain, wind: wind };
-	console.log(result, openMeteo, pent);
     
 	return result;
 }
 
-function codeForWmo(data, target) {
-  const entry = data.find(e => {
-    const w = e.wmo;
-    if (w === undefined) return false;
-    return Array.isArray(w) ? w.includes(target) : w === target;
-  });
-  return entry ? entry.code : undefined;
-}
-
-function codeForWmoWithIndex(data, target) {
+function codeForWmoWithIndex(data, target) {// FUNCT: get's code and index from data
   for (let i = 0; i < data.length; i++) {
     const w = data[i].wmo;
     if (w === undefined) continue;

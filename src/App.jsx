@@ -16,7 +16,6 @@ export default function App() {
 	useEffect(() => {
 		(async () => {
 			const [lat, lon] = await GetWhere("Oslo");
-			console.log(lat, lon);
 			
 			dataSet = await GetWeather({ lat, lon });
 			setData(marge(dataSet, day));
@@ -30,20 +29,20 @@ export default function App() {
         const nextbtn = document.getElementById("next");
 		preveusbtn.disabled = true;
 
-        function onPrev() {
+        function onPrev() {// FUNCT: Preveus day display change
             day--;
             if (day <= 0) preveusbtn.disabled = true;
             nextbtn.disabled = false;
             onSubmit(true);
         };
-        function onNext() {
+        function onNext() {// FUNCT: Next day display change
             day++;
             if (day >= 2) nextbtn.disabled = true;
             preveusbtn.disabled = false;
             onSubmit(true);
         };
 
-		const onSubmit = async (dayChange) => {
+		const onSubmit = async (dayChange) => {// FUNCT: Changes data displayed
             if (!dayChange) {
                 const [lat, lon] = await GetWhere(userInput.value.replaceAll(" ", "+"));
                 dataSet = await GetWeather({ lat, lon });

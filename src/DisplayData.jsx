@@ -2,9 +2,7 @@ import { useRef } from "react";
 import { Chart, Title, Legend, XAxis, YAxis } from "@highcharts/react";
 import { SplineSeries } from "@highcharts/react/series/Spline";
 import { ColumnSeries } from "@highcharts/react/series/Column";
-export function SplineChart({ title, data = [], color, chartRef, time }) {
-	const series = data || [];
-
+export function SplineChart({ title, data = [], color, chartRef, time }) {// FUNCT: Builds line charts
 	return (
 		<Chart ref={chartRef} backgroundColor={color.background}>
 			<Title>{`<span style="color:${color.text}">${title}</span>`}</Title>
@@ -17,7 +15,7 @@ export function SplineChart({ title, data = [], color, chartRef, time }) {
 	);
 }
 
-export function ColumnChart({ title, data = [], color, chartRef, time }) {
+export function ColumnChart({ title, data = [], color, chartRef, time }) {// FUNCT: builds column charts
 	return (
 		<Chart backgroundColor={color.background}>
 			<Title>{`<span style="color:${color.text}">${title}</span>`}</Title>
