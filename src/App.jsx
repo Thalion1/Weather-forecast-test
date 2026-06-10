@@ -43,6 +43,8 @@ export default function App() {
         };
 
 		const onSubmit = async (dayChange) => {// FUNCT: Changes data displayed
+			console.log(dayChange);
+			
             if (!dayChange) {
                 const [lat, lon] = await GetWhere(userInput.value.replaceAll(" ", "+"));
                 dataSet = await GetWeather({ lat, lon });
@@ -69,12 +71,12 @@ export default function App() {
 		};
 
 		userInput.addEventListener("keydown", onKey);
-		userSubBtn.addEventListener("click", onSubmit(false));
+		userSubBtn.addEventListener("click", () => onSubmit(false));
         preveusbtn.addEventListener('click', onPrev);
         nextbtn.addEventListener('click', onNext);
 		return () => {
 			userInput.removeEventListener("keydown", onKey);
-			userSubBtn.removeEventListener("click", onSubmit(false));
+			userSubBtn.removeEventListener("click", onSubmit);
             preveusbtn.removeEventListener('click', onPrev);
             nextbtn.removeEventListener('click', onNext);
 		};
