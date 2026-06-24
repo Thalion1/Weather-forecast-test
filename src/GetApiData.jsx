@@ -41,11 +41,16 @@ class symbolAdder {
 	}
 }
 
-export async function GetWhere(props) {// FUNCT: Get's lat and lon
-	const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${props}&format=jsonv2`);
+export async function GetWhere(props, index) {// FUNCT: Get's lat and lon
+	// const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${props}&format=jsonv2`);
+	const response = await fetch(`https://pent.no/api/v2/places?q=${props}`)
 	const data = await response.json();
-	
-	return [data[0].lat, data[0].lon];// FIXME: it's spiting out errors on start
+	console.log(data);
+
+	if (index !== undefined) {
+		return [data.locations[0].latitude, data.locations[0].longitude];// FIXME: it's spiting out errors on start
+	}
+	return data
 }
 
 export async function GetWeather({ lat, lon }) {// FUNCT: Get's weather data
@@ -86,7 +91,9 @@ function dataCleanup(openMeteo, pentData) {// FUNCT: cleans up openMeteo data
 	return result;
 }
 
-export function marge({openMeteo, pent, code}, day) {// FUNCT: Combins data
+export function marge({openMeteo, pent, code}, day = 0) {// FUNCT: Combins data
+	console.log("test", pent);
+	
 	const key = Object.keys(pent);
 	let temps = [];
 	let rain = [];

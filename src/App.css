@@ -186,3 +186,29 @@ nav {
     flex-flow: row nowrap;
     justify-content: space-between;
 }
+
+.user-inputs {
+	anchor-name: --a1;
+}
+
+.dropdown-container {
+	position: absolute;
+	display: flex;
+	position-anchor: --a1;
+	position-area: bottom center;
+	flex-flow: column nowrap;
+	gap: 10em;
+	align-items: end;
+	width: max-content;
+	z-index: 1;
+}
+
+.dropdown-container * {
+	margin: 0;
+	background-color: rgba(0, 0, 0, 0.6);
+	padding: 0.3em;
+	display: flex;
+	flex-flow: column nowrap;
+	width: fit-content;
+	height: fit-content;
+}
