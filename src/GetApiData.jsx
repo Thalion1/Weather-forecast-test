@@ -45,7 +45,6 @@ export async function GetWhere(props, index) {// FUNCT: Get's lat and lon
 	// const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${props}&format=jsonv2`);
 	const response = await fetch(`https://pent.no/api/v2/places?q=${props}`)
 	const data = await response.json();
-	console.log(data);
 
 	if (index !== undefined) {
 		return [data.locations[0].latitude, data.locations[0].longitude];// FIXME: it's spiting out errors on start
@@ -92,7 +91,6 @@ function dataCleanup(openMeteo, pentData) {// FUNCT: cleans up openMeteo data
 }
 
 export function marge({openMeteo, pent, code}, day = 0) {// FUNCT: Combins data
-	console.log("test", pent);
 	
 	const key = Object.keys(pent);
 	let temps = [];

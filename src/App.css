@@ -201,6 +201,8 @@ nav {
 	align-items: end;
 	width: max-content;
 	z-index: 1;
+	height: 70vh;
+	overflow-y: auto;
 }
 
 .dropdown-container * {
@@ -211,4 +213,8 @@ nav {
 	flex-flow: column nowrap;
 	width: fit-content;
 	height: fit-content;
+}
+
+.hover-cursor:hover {
+  cursor: pointer; /* change to: crosshair, grab, text, etc. */
 }

@@ -4,11 +4,9 @@ import { GetWeather, GetWhere, marge } from "./GetApiData.jsx";
 import { Dropdownlist } from "./DropDown.jsx";
 // import { AppContext } from "./App.jsx";
 import "./App.css";
-console.log("file start"); // TEST start
+import { useParams, useNavigate } from "react-router-dom";
 
 export const AppContext = createContext({});
-
-
 
 export default function App() {
     let textColor = getComputedStyle(document.documentElement).getPropertyValue("--text").trim();
@@ -17,38 +15,32 @@ export default function App() {
     const tempRef = useRef(null);
     const rainRef = useRef(null);
     const windRef = useRef(null);
-    // const [dataSet, setDataSet] = useState(0);
     const dataSet = useRef(null);
     let day = 0;
-    console.log('app start');// TEST app start
-    
+    const baseLink = "/Weather-forecast-test"
+    const navigate = useNavigate();
+    const { lat, lon, place } = useParams();
+    const mode = useRef(place !== undefined ? "place" : (lat !== undefined && lon !== undefined) ? "position" : "none")
+
+    if (mode !== "none") {
+        console.log(mode, { lat, lon, place });
+    }
 
     const [data2, setData2] = useState({ locations: [] });
 
-    useEffect(() => {
-        (async () => {
-            console.log('dropdown start');// TEST dropdown start state
-            
-            // setData2(await GetWhere("vold"));
-            /*const [lat, lon] = await GetWhere("Oslo");
-
-            dataSet = await GetWeather({ lat, lon });
-            setData(marge(dataSet, day));*/
-        })();
-    }, []);
-
-    useEffect(() => {
-        console.log('primery useEffect start');// TEST prim useEffect start
+    // useEffect(() => {
         
+    // }, [])
+
+    useEffect(() => {
         const userInput = document.getElementById("user-input");
         const userSubBtn = document.getElementById("user-submit");
         const preveusbtn = document.getElementById("preveus");
         const nextbtn = document.getElementById("next");
         preveusbtn.disabled = true;
 
-        async function test() {
-            setData2(await GetWhere(userInput.value.replaceAll(" ", "+")));
-        }
+        const testInput = document.getElementById("test");
+
         function onPrev() {
             // FUNCT: Preveus day display change
             day--;
@@ -61,7 +53,6 @@ export default function App() {
             day++;
             if (day >= 2) nextbtn.disabled = true;
             preveusbtn.disabled = false;
-            console.log("dataSet", dataSet);
             
             onSubmit(true);
         }
@@ -69,51 +60,64 @@ export default function App() {
         let debounceTimer = null;
 
         const onKey = async (e) => {
+            // FUNCT: Handls text box inputs
             if (e.code === "Enter") {
                 // immediate submit on Enter
                 if (debounceTimer) clearTimeout(debounceTimer);
-                await onSubmit(false, userInput, 0);
+                await onSubmit(false, 0);
+                // await testFunct(1, 1, userInput)
                 return;
             }
 
             // schedule GetWhere after 300ms of no new input
             if (debounceTimer) clearTimeout(debounceTimer);
             const query = userInput.value.replaceAll(" ", "+");
-            console.log(query); // TEST query log
 
             debounceTimer = setTimeout(async () => {
                 setData2(await GetWhere(query));
             }, 1250);
         };
 
-        console.log('event listener start');// TEST event listener start
-        
+        async function testFunct(lat, lon, place) {
+            console.log("test");
+            if (place !== undefined) {
+                [lat, lon] = await GetWhere(place.value.replaceAll(" ", "+"), 0);
+            }
+            
+            mode.current = "position";
+            navigate(`${baseLink}/position/${lat}/${lon}`);
+            console.log("mode", mode.current);
+        }
+
         userInput.addEventListener("keydown", onKey); // FUNCT: Adds eventlisteners
-        userSubBtn.addEventListener("click", () => onSubmit(false, userInput, 0));
+        userSubBtn.addEventListener("click", () => onSubmit(false, 0));
         preveusbtn.addEventListener("click", onPrev);
         nextbtn.addEventListener("click", onNext);
+        testInput.addEventListener("click", () => {
+            navigate(baseLink + "/");
+            setData({ temp: [], rain: [], wind: [] });
+        })
         return () => {
             userInput.removeEventListener("keydown", onKey);
             userSubBtn.removeEventListener("click", onSubmit);
             preveusbtn.removeEventListener("click", onPrev);
             nextbtn.removeEventListener("click", onNext);
+            testInput.addEventListener("click", testFunct)
         };
     }, []);
 
-    const onSubmit = async (dayChange, input, index = 0) => {// FUNCT: Changes data displayed
-        console.log(dayChange, input, index);
+    const onSubmit = async (dayChange, index = 0) => {// FUNCT: Changes data displayed
+        console.log("onSubmit called", { dayChange, index });
         
         if (!dayChange) {
-            console.log(input.value, 'submit test');// TEST submit input
-            
-            const [lat, lon] = await GetWhere(input.value.replaceAll(" ", "+"), index);
-            
+            const [lat, lon] = await GetWhere(document.getElementById("user-input").value.replaceAll(" ", "+"), index);
+            navigate(`${baseLink}/position/${lat}/${lon}`);
             dataSet.current = await GetWeather({ lat, lon });
         }
-        console.log("dataSet", dataSet.current, day);
         
         const newData = marge(dataSet.current, day);
-        console.log("newData", newData, day);
+        console.log(dataSet.current);
+        
         setData(newData);
         setData2({ locations: [] });
 
@@ -130,8 +134,41 @@ export default function App() {
         }
         // repeat for windRef if needed
     };
+
+    useEffect(() => {
+        console.log("jkfldaj", lat, lon, place);
+        
+        (async () => {
+            // const { lat, lon, place } = useParams();
+            // const mode = place !== undefined ? "place" : (lat !== undefined && lon !== undefined) ? "position" : "none";
+            const position = { lat: parseFloat(lat), lon: parseFloat(lon) }
+            console.log(mode.current);
+
+            console.log(typeof(lat), lat, typeof(lon), lon, typeof(place), place);
+            switch (mode.current) {
+                case "place":
+                    console.log("place test");
+                    const [lat, lon] = await GetWhere(place);
+                    dataSet.current = await GetWeather({ lat, lon });
+                    onSubmit(true)
+                    break;
+                case "position":
+                    console.log("position test");
+
+                    dataSet.current = await GetWeather(position);
+
+                    onSubmit(true);
+                    break;
+                default:
+
+                    break;
+            }
+        })();
+    }, [lat, lon, place])
     
     const contextValue = useMemo(() => ({ onSubmit }), [onSubmit]);
+    console.log("AppContext in App.jsx:", AppContext);
+    console.log("Provider value:", contextValue);
 
     return (
         <AppContext.Provider value={contextValue}>
@@ -140,6 +177,7 @@ export default function App() {
                 <div className="user-inputs">
                     <input type="text" id="user-input" />
                     <input type="submit" value="submit" id="user-submit" />
+                    <input type="submit" value="test" id="test" />
                 </div>
                 <div className="dropdown-container">
                     <Dropdownlist list={data2} input={document.getElementById("user-input")} />
