@@ -1,12 +1,21 @@
 import { useEffect, useState, useRef, createContext, useCallback, useMemo } from "react";
 import { SplineChart, ColumnChart } from "./DisplayData.jsx";
-import { GetWeather, GetWhere, marge } from "./GetApiData.jsx";
+import { getWeather, getWhere, marge } from "./GetApiData.jsx";
 import { Dropdownlist } from "./DropDown.jsx";
 // import { AppContext } from "./App.jsx";
 import "./App.css";
 import { useParams, useNavigate } from "react-router-dom";
 
 export const AppContext = createContext({});
+
+/* const AppContext = ({children}) => {
+    const Provider = {onS}
+    return (
+        <appContext.Provider value={contextValue}>
+            {children}
+        </appContext.Provider>
+    )
+} */
 
 export default function App() {
     let textColor = getComputedStyle(document.documentElement).getPropertyValue("--text").trim();
@@ -15,13 +24,15 @@ export default function App() {
     const tempRef = useRef(null);
     const rainRef = useRef(null);
     const windRef = useRef(null);
+    const previousButtonRef = useRef(null);
+    const nextButtonRef = useRef(null);
     const dataSet = useRef(null);
     let day = 0;
     const baseLink = "/Weather-forecast-test"
     const navigate = useNavigate();
     const { lat, lon, place } = useParams();
     const mode = useRef(place !== undefined ? "place" : (lat !== undefined && lon !== undefined) ? "position" : "none")
-
+    const [searchInput, setSearchInput] = useState("")
     if (mode !== "none") {
         console.log(mode, { lat, lon, place });
     }
@@ -35,27 +46,13 @@ export default function App() {
     useEffect(() => {
         const userInput = document.getElementById("user-input");
         const userSubBtn = document.getElementById("user-submit");
-        const preveusbtn = document.getElementById("preveus");
-        const nextbtn = document.getElementById("next");
-        preveusbtn.disabled = true;
-
+        const previousButton = previousButtonRef.current;
+        const nextButton = nextButtonRef.current;
         const testInput = document.getElementById("test");
+ 
+        previousButton.disabled = true;
 
-        function onPrev() {
-            // FUNCT: Preveus day display change
-            day--;
-            if (day <= 0) preveusbtn.disabled = true;
-            nextbtn.disabled = false;
-            onSubmit(true);
-        }
-        function onNext() {
-            // FUNCT: Next day display change
-            day++;
-            if (day >= 2) nextbtn.disabled = true;
-            preveusbtn.disabled = false;
-            
-            onSubmit(true);
-        }
+        
 
         let debounceTimer = null;
 
@@ -74,14 +71,14 @@ export default function App() {
             const query = userInput.value.replaceAll(" ", "+");
 
             debounceTimer = setTimeout(async () => {
-                setData2(await GetWhere(query));
+                setData2(await getWhere(query));
             }, 1250);
         };
 
         async function testFunct(lat, lon, place) {
             console.log("test");
             if (place !== undefined) {
-                [lat, lon] = await GetWhere(place.value.replaceAll(" ", "+"), 0);
+                [lat, lon] = await getWhere(place.value.replaceAll(" ", "+"), 0);
             }
             
             mode.current = "position";
@@ -91,28 +88,45 @@ export default function App() {
 
         userInput.addEventListener("keydown", onKey); // FUNCT: Adds eventlisteners
         userSubBtn.addEventListener("click", () => onSubmit(false, 0));
-        preveusbtn.addEventListener("click", onPrev);
-        nextbtn.addEventListener("click", onNext);
-        testInput.addEventListener("click", () => {
+        previousButton.addEventListener("click", onPrev);
+        nextButton.addEventListener("click", onNext);
+        const onTest = () => {
             navigate(baseLink + "/");
             setData({ temp: [], rain: [], wind: [] });
-        })
+        };
+        testInput.addEventListener("click", onTest);
         return () => {
             userInput.removeEventListener("keydown", onKey);
             userSubBtn.removeEventListener("click", onSubmit);
-            preveusbtn.removeEventListener("click", onPrev);
-            nextbtn.removeEventListener("click", onNext);
-            testInput.addEventListener("click", testFunct)
+            previousButton.removeEventListener("click", onPrev);
+            nextButton.removeEventListener("click", onNext);
+            testInput.removeEventListener("click", onTest);
         };
     }, []);
+
+    function onPrev() {
+        // FUNCT: Preveus day display change
+        day--;
+        if (day <= 0) previousButtonRef.current.disabled = true;
+        nextButtonRef.current.disabled = false;
+        onSubmit(true);
+    }
+    function onNext() {
+        // FUNCT: Next day display change
+        day++;
+        if (day >= 2) nextButtonRef.current.disabled = true;
+        previousButtonRef.current.disabled = false;
+        
+        onSubmit(true);
+    }
 
     const onSubmit = async (dayChange, index = 0) => {// FUNCT: Changes data displayed
         console.log("onSubmit called", { dayChange, index });
         
         if (!dayChange) {
-            const [lat, lon] = await GetWhere(document.getElementById("user-input").value.replaceAll(" ", "+"), index);
+            const [lat, lon] = await getWhere(document.getElementById("user-input").value.replaceAll(" ", "+"), index);
             navigate(`${baseLink}/position/${lat}/${lon}`);
-            dataSet.current = await GetWeather({ lat, lon });
+            dataSet.current = await getWeather({ lat, lon });
         }
         
         const newData = marge(dataSet.current, day);
@@ -148,14 +162,14 @@ export default function App() {
             switch (mode.current) {
                 case "place":
                     console.log("place test");
-                    const [lat, lon] = await GetWhere(place);
-                    dataSet.current = await GetWeather({ lat, lon });
+                    const [lat, lon] = await getWhere(place, 0);
+                    dataSet.current = await getWeather({ lat, lon });
                     onSubmit(true)
                     break;
                 case "position":
                     console.log("position test");
 
-                    dataSet.current = await GetWeather(position);
+                    dataSet.current = await getWeather(position);
 
                     onSubmit(true);
                     break;
@@ -172,17 +186,18 @@ export default function App() {
 
     return (
         <AppContext.Provider value={contextValue}>
+            <>
             <nav>
-                <button id="preveus">←</button>
+                <button id="preveus" ref={previousButtonRef}>←</button>
                 <div className="user-inputs">
-                    <input type="text" id="user-input" />
+                    <input type="text" id="user-input" value={searchInput} onChange={(e) => {setSearchInput(e.target.value)}} />
                     <input type="submit" value="submit" id="user-submit" />
-                    <input type="submit" value="test" id="test" />
+                    <input type="submit" value="Clear" id="test" />
                 </div>
                 <div className="dropdown-container">
                     <Dropdownlist list={data2} input={document.getElementById("user-input")} />
                 </div>
-                <button id="next">→</button>
+                <button id="next" ref={nextButtonRef}>→</button>
             </nav>
             <main>
                 <div id="container">
@@ -191,6 +206,13 @@ export default function App() {
                     <SplineChart title="wind for the day" yaxis="Wind" tooltip="m/s" data={data.wind} time={data.time} color={{ background: backgroundColor, text: textColor }} chartRef={windRef} />
                 </div>
             </main>
+            </>
         </AppContext.Provider>
     );
 }
+
+/*
+onClick={onPrev()} preveus
+onClick={onNext()} next
+
+*/

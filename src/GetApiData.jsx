@@ -41,7 +41,7 @@ class symbolAdder {
 	}
 }
 
-export async function GetWhere(props, index) {// FUNCT: Get's lat and lon
+export async function getWhere(props, index) {// FUNCT: Get's lat and lon
 	// const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${props}&format=jsonv2`);
 	const response = await fetch(`https://pent.no/api/v2/places?q=${props}`)
 	const data = await response.json();
@@ -52,7 +52,7 @@ export async function GetWhere(props, index) {// FUNCT: Get's lat and lon
 	return data
 }
 
-export async function GetWeather({ lat, lon }) {// FUNCT: Get's weather data
+export async function getWeather({ lat, lon }) {// FUNCT: Get's weather data
 	const weatherCodeInfo = await fetch(`https://thalion1.github.io/static-apis/weather-id-to-icon.JSON`);
 	const openMeteoResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,weather_code,apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,wind_direction_80m,wind_speed_80m,is_day&forecast_days=3&wind_speed_unit=ms`);
 	const pentResponse = await fetch(`https://pent.no/api/v2/long-term-forecast/${lat}/${lon}?days=3&resolution=1`);
