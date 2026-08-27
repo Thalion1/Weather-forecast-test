@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather Forecast</title>
+    <script type="text/javascript">
+      // GitHub Pages serves this file for unknown paths; restore the SPA path
+      // after redirecting through the repository root.
+      const repository = "/Weather-forecast-test";
+      const path = window.location.pathname.slice(repository.length);
+      const query = window.location.search;
+      const hash = window.location.hash;
+      window.location.replace(`${repository}/?redirect=${encodeURIComponent(path + query + hash)}`);
+    </script>
+  </head>
+  <body></body>
+</html>
