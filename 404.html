@@ -11,6 +11,7 @@
       const path = window.location.pathname.slice(repository.length);
       const query = window.location.search;
       const hash = window.location.hash;
+      console.log(`${repository}/?redirect=${encodeURIComponent(repository + path + query + hash)}`);
       window.location.replace(`${repository}/?redirect=${encodeURIComponent(repository + path + query + hash)}`);
     </script>
   </head>
