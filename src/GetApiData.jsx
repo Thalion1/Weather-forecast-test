@@ -41,21 +41,32 @@ class symbolAdder {
 	}
 }
 
-export async function getWhere(props, index) {// FUNCT: Get's lat and lon
+// Resolve a search query to coordinates, or return all matching locations.
+export async function getWhere(props, index) {
 	// const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${props}&format=jsonv2`);
 	const response = await fetch(`https://pent.no/api/v2/places?q=${props}`)
+	if (!response.ok) {
+		throw new Error(`Place lookup failed (${response.status})`);
+	}
 	const data = await response.json();
 
 	if (index !== undefined) {
-		return [data.locations[0].latitude, data.locations[0].longitude];// FIXME: it's spiting out errors on start
+		if (!data.locations?.[index]) {
+			throw new Error("No matching place was found");
+		}
+		return [data.locations[index].latitude, data.locations[index].longitude];
 	}
 	return data
 }
 
-export async function getWeather({ lat, lon }) {// FUNCT: Get's weather data
+// Fetch the provider data needed to build the forecast charts.
+export async function getWeather({ lat, lon }) {
 	const weatherCodeInfo = await fetch(`https://thalion1.github.io/static-apis/weather-id-to-icon.JSON`);
 	const openMeteoResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,weather_code,apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,wind_direction_80m,wind_speed_80m,is_day&forecast_days=3&wind_speed_unit=ms`);
 	const pentResponse = await fetch(`https://pent.no/api/v2/long-term-forecast/${lat}/${lon}?days=3&resolution=1`);
+	if (!weatherCodeInfo.ok || !openMeteoResponse.ok || !pentResponse.ok) {
+		throw new Error(`Weather request failed (${weatherCodeInfo.status}/${openMeteoResponse.status}/${pentResponse.status})`);
+	}
 	const weatherCodeInfoData = await weatherCodeInfo.json();
 	const openMeteoData = await openMeteoResponse.json();
 	const pentData = await pentResponse.json();
@@ -63,7 +74,8 @@ export async function getWeather({ lat, lon }) {// FUNCT: Get's weather data
 	return {openMeteo: dataCleanup(openMeteoData, pentData), pent: pentData, code: weatherCodeInfoData};
 }
 
-function dataCleanup(openMeteo, pentData) {// FUNCT: cleans up openMeteo data
+// Align Open-Meteo's hourly records with Pent's forecast-day boundaries.
+function dataCleanup(openMeteo, pentData) {
 	const data = openMeteo.hourly;
 	let result = [];
 
@@ -90,7 +102,8 @@ function dataCleanup(openMeteo, pentData) {// FUNCT: cleans up openMeteo data
 	return result;
 }
 
-export function marge({openMeteo, pent, code}, day = 0) {// FUNCT: Combins data
+// Convert both providers into the series and time labels expected by the charts.
+export function marge({openMeteo, pent, code}, day = 0) {
 	
 	const key = Object.keys(pent);
 	let temps = [];
@@ -142,7 +155,8 @@ export function marge({openMeteo, pent, code}, day = 0) {// FUNCT: Combins data
 	return result;
 }
 
-function codeForWmoWithIndex(data, target) {// FUNCT: get's code and index from data
+// Find the icon metadata matching an Open-Meteo weather code.
+function codeForWmoWithIndex(data, target) {
   for (let i = 0; i < data.length; i++) {
     const w = data[i].wmo;
     if (w === undefined) continue;

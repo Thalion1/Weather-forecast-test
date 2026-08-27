@@ -2,7 +2,8 @@ import { useRef } from "react";
 import { Chart, Title, Legend, XAxis, YAxis } from "@highcharts/react";
 import { SplineSeries } from "@highcharts/react/series/Spline";
 import { ColumnSeries } from "@highcharts/react/series/Column";
-export function SplineChart({ title, data = [], color, chartRef, time, yaxis, tooltip }) {// FUNCT: Builds line charts
+// Render a line chart for temperature or wind data.
+export function SplineChart({ title, data = [], color, chartRef, time, yaxis, tooltip }) {
 	return (
 		<Chart ref={chartRef} backgroundColor={color.background}>
 			<Title>{`<span style="color:${color.text}">${title}</span>`}</Title>
@@ -15,7 +16,8 @@ export function SplineChart({ title, data = [], color, chartRef, time, yaxis, to
 	);
 }
 
-export function ColumnChart({ title, data = [], color, chartRef, time, yaxis, tooltip }) {// FUNCT: builds column charts
+// Render a column chart for precipitation data.
+export function ColumnChart({ title, data = [], color, chartRef, time, yaxis, tooltip }) {
 	return (
 		<Chart backgroundColor={color.background}>
 			<Title>{`<span style="color:${color.text}">${title}</span>`}</Title>
